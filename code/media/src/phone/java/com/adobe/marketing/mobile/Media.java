@@ -14,6 +14,7 @@ package com.adobe.marketing.mobile;
 import com.adobe.marketing.mobile.media.internal.MediaExtension;
 import com.adobe.marketing.mobile.media.internal.MediaObject;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -100,7 +101,7 @@ public class Media {
      * @param length The length of the media in seconds
      * @param streamType The stream type as a string. Use the pre-defined constants for vod, live,
      *     and linear content
-     * @param mediaType Mediatype
+     * @param mediaType The type of media which can be video or audio
      * @return A MediaObject instance representing the media.
      */
     @NotNull public static HashMap<String, Object> createMediaObject(
