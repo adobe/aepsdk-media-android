@@ -53,3 +53,7 @@ dependencies {
     implementation 'com.adobe.marketing.mobile:identity:2.+'
     implementation 'com.adobe.marketing.mobile:assurance:2.+'
 }
+
+configurations.configureEach {
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
