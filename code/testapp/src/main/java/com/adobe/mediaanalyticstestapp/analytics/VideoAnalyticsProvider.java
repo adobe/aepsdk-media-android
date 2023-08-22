@@ -27,7 +27,7 @@ import com.adobe.mediaanalyticstestapp.player.*;
 import java.util.*;
 
 public class VideoAnalyticsProvider implements Observer {
-	private static final String LOG_TAG = "[Sample]::VideoAnalyticsProvider";
+	private static final String LOG_TAG = "VideoAnalyticsProvider";
 
 	private VideoPlayer _player;
 	private MediaTracker _tracker;
