@@ -247,7 +247,7 @@ class MediaOfflineService implements MediaHitProcessor {
                 Log.trace(
                         MediaInternalConstants.EXTENSION_LOG_TAG,
                         LOG_TAG,
-                        "ReportCompletedSessions - Exiting as we are currently sending session"
+                        "reportCompletedSessions - Exiting as we are currently sending session."
                                 + " report.");
                 return false;
             }
@@ -258,7 +258,7 @@ class MediaOfflineService implements MediaHitProcessor {
                 Log.trace(
                         MediaInternalConstants.EXTENSION_LOG_TAG,
                         LOG_TAG,
-                        "ReportCompletedSessions - Exiting as we have no pending sessions to"
+                        "reportCompletedSessions - Exiting as we have no pending sessions to"
                                 + " report.");
                 return false;
             }
@@ -268,10 +268,10 @@ class MediaOfflineService implements MediaHitProcessor {
                 return false;
             }
 
-            Log.trace(
+            Log.debug(
                     MediaInternalConstants.EXTENSION_LOG_TAG,
                     LOG_TAG,
-                    "ReportCompletedSessions - Reporting Session %s.",
+                    "reportCompletedSessions - Reporting Session %s.",
                     sessionID);
             List<MediaHit> hits = mediaDBService.getHits(sessionID);
 
@@ -282,7 +282,7 @@ class MediaOfflineService implements MediaHitProcessor {
                 Log.warning(
                         MediaInternalConstants.EXTENSION_LOG_TAG,
                         LOG_TAG,
-                        "ReportCompletedSessions - Could not generate downloaded content report"
+                        "reportCompletedSessions - Could not generate downloaded content report"
                                 + " from persisted hits for session %s. Clearing persisted pings.",
                         sessionID);
                 mediasessionIDManager.updateSessionState(
@@ -299,8 +299,8 @@ class MediaOfflineService implements MediaHitProcessor {
                 Log.warning(
                         MediaInternalConstants.EXTENSION_LOG_TAG,
                         LOG_TAG,
-                        "ReportCompletedSessions - Could not generate url for reporting downloaded"
-                                + " content report for session %s",
+                        "reportCompletedSessions - Could not generate url for reporting downloaded"
+                                + " content report for session %s.",
                         sessionID);
                 return false;
             }
@@ -341,15 +341,18 @@ class MediaOfflineService implements MediaHitProcessor {
                                     Log.debug(
                                             MediaInternalConstants.EXTENSION_LOG_TAG,
                                             LOG_TAG,
-                                            "ReportCompletedSessions - Http request error,"
-                                                    + " connection was null");
+                                            "reportCompletedSessions - Failed to report session %s"
+                                                    + " because the connection is null (network is"
+                                                    + " offline).",
+                                            currentReportingSession);
                                 } else {
                                     int respCode = connection.getResponseCode();
+                                    connection.close();
 
-                                    Log.trace(
+                                    Log.debug(
                                             MediaInternalConstants.EXTENSION_LOG_TAG,
                                             LOG_TAG,
-                                            "ReportCompletedSessions - Http request completed for"
+                                            "reportCompletedSessions - Http request completed for"
                                                     + " session %s with status code %s.",
                                             currentReportingSession,
                                             respCode);
@@ -372,7 +375,7 @@ class MediaOfflineService implements MediaHitProcessor {
                                         Log.trace(
                                                 MediaInternalConstants.EXTENSION_LOG_TAG,
                                                 LOG_TAG,
-                                                "ReportCompletedSessions - Clearing persisted"
+                                                "reportCompletedSessions - Clearing persisted"
                                                         + " pings for session %s.",
                                                 currentReportingSession);
                                         mediaDBService.deleteHits(currentReportingSession);
@@ -381,10 +384,6 @@ class MediaOfflineService implements MediaHitProcessor {
 
                                 isReportingSession = false;
                                 currentReportingSession = null;
-                            }
-
-                            if (connection != null) {
-                                connection.close();
                             }
 
                             // Note :- If http request succeeds, we can try sending next available
