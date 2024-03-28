@@ -1,18 +1,22 @@
+#
+# Copyright 2024 Adobe. All rights reserved.
+# This file is licensed to you under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License. You may obtain a copy
+# of the License at http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software distributed under
+# the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+# OF ANY KIND, either express or implied. See the License for the specific language
+# governing permissions and limitations under the License.
+#
+
 EXTENSION-LIBRARY-FOLDER-NAME = media
 TEST-APP-FOLDER-NAME = testapp
 
-BUILD-ASSEMBLE-LOCATION = ./ci/assemble
-ROOT_DIR=$(shell git rev-parse --show-toplevel)
+init:
+	git config core.hooksPath .githooks
 
-PROJECT_NAME = $(shell cat $(ROOT_DIR)/code/gradle.properties | grep "moduleProjectName" | cut -d'=' -f2)
-AAR_NAME = $(shell cat $(ROOT_DIR)/code/gradle.properties | grep "moduleAARName" | cut -d'=' -f2)
-MODULE_NAME = $(shell cat $(ROOT_DIR)/code/gradle.properties | grep "moduleName" | cut -d'=' -f2)
-LIB_VERSION = $(shell cat $(ROOT_DIR)/code/gradle.properties | grep "moduleVersion" | cut -d'=' -f2)
-SOURCE_FILE_DIR =  $(ROOT_DIR)/code/$(PROJECT_NAME)
-AAR_FILE_DIR =  $(ROOT_DIR)/code/$(PROJECT_NAME)/build/outputs/aar
-
-clean:
-	(rm -rf $(AAR_FILE_DIR))
+clean:	
 	(./code/gradlew -p code clean)
 
 checkstyle: 
@@ -20,9 +24,14 @@ checkstyle:
 
 checkformat:
 	(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) spotlessCheck)
+	(./code/gradlew -p code/$(TEST-APP-FOLDER-NAME) spotlessCheck)
 
 format:
 	(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) spotlessApply)
+	(./code/gradlew -p code/$(TEST-APP-FOLDER-NAME) spotlessApply)
+
+format-license:
+	(./code/gradlew -p code licenseFormat)
 
 unit-test:
 	(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) testPhoneDebugUnitTest)
@@ -34,31 +43,30 @@ functional-test:
 	(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) uninstallPhoneDebugAndroidTest)
 	(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) connectedPhoneDebugAndroidTest)		
 
-functional-test-coverage:		
+functional-test-coverage:
+	(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) uninstallPhoneDebugAndroidTest)
 	(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) createPhoneDebugAndroidTestCoverageReport)
 
 javadoc:
-	(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) javadocPublish)
+	(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) javadocJar)
 
 assemble-phone:
-		(./code/gradlew -p code/${EXTENSION-LIBRARY-FOLDER-NAME}  assemblePhone)
+	(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) assemblePhone)
 
-assemble-phone-release:		
-		(./code/gradlew -p code/${EXTENSION-LIBRARY-FOLDER-NAME}  assemblePhoneRelease)
+assemble-phone-debug:
+	(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME)  assemblePhoneDebug)
 
-build-release:
-	(./code/gradlew -p code/${EXTENSION-LIBRARY-FOLDER-NAME} clean lint assemblePhoneRelease)
+assemble-phone-release:
+	(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME)  assemblePhoneRelease)
 
-publish-maven-local:
-	(./code/gradlew -p code/${EXTENSION-LIBRARY-FOLDER-NAME} assemblePhone)
-	(./code/gradlew -p code/${EXTENSION-LIBRARY-FOLDER-NAME} publishReleasePublicationToMavenLocal -x signReleasePublication)
+assemble-app:
+	(./code/gradlew -p code/$(TEST-APP-FOLDER-NAME) assemble)
 
-ci-publish-staging: clean build-release
-	(./code/gradlew -p code/${EXTENSION-LIBRARY-FOLDER-NAME} publishReleasePublicationToSonatypeRepository --stacktrace)
+ci-publish-maven-local-jitpack:
+	(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) publishReleasePublicationToMavenLocal -Pjitpack  -x signReleasePublication)
 
-ci-publish-main: clean build-release
-	(./code/gradlew -p code/${EXTENSION-LIBRARY-FOLDER-NAME} publishReleasePublicationToSonatypeRepository -Prelease)
+ci-publish-staging:
+	(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) publishReleasePublicationToSonatypeRepository)
 
-ci-publish-jitpack:
-	(./code/gradlew -p code/${EXTENSION-LIBRARY-FOLDER-NAME} assemblePhone)
-	(./code/gradlew -p code/${EXTENSION-LIBRARY-FOLDER-NAME} publishReleasePublicationToMavenLocal -Pjitpack -x signReleasePublication)
+ci-publish:
+	(./code/gradlew -p code/$(EXTENSION-LIBRARY-FOLDER-NAME) publishReleasePublicationToSonatypeRepository -Prelease)

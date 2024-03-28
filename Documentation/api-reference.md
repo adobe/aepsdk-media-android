@@ -23,25 +23,25 @@ val mediaExtensionVersion = Media.extensionVersion()
 
 ### EXTENSION
 
-Represents a reference to AssuranceExtension.class that can be used to register with MobileCore via its registerExtensions api.
+Represents a reference to MediaExtension.class that can be used to register with MobileCore via its registerExtensions api.
 
 #### Syntax
 ```java
-public static final Class<? extends Extension> EXTENSION = AssuranceExtension.class;
+public static final Class<? extends Extension> EXTENSION = MediaExtension.class;
 ````
 
 #### Example
 
 ##### Java
 ```java
-MobileCore.registerExtensions(Arrays.asList(Assurance.EXTENSION, ...), new AdobeCallback<Object>() {
+MobileCore.registerExtensions(Arrays.asList(Media.EXTENSION, ...), new AdobeCallback<Object>() {
     // implement completion callback
 });
 ```
 
 ##### Kotlin
 ```kotlin
-MobileCore.registerExtensions(listOf(Assurance.EXTENSION, ...)){
+MobileCore.registerExtensions(listOf(Media.EXTENSION, ...)){
     // implement completion callback
 }
 ```

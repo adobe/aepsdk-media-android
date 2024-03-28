@@ -835,9 +835,20 @@ public class MediaOfflineServiceTests {
         jsonHits.add(mockData.sessionStartJsonWithState);
         jsonHits.add(mockData.completeJson);
 
-        expectNetworkDataAndRespond(jsonHits, -1);
+        // When network service returns null connection (network offline), session should not be
+        // dropped.
+        mockNetworkService.setResponse(null);
+
         assertTrue(offlineService.reportCompletedSessions());
+        assertTrue(didSendNetworkRequest());
         assertTrue(mediaDBService.sessionPresent(sessionId));
+
+        mockNetworkService.reset();
+        expectNetworkDataAndRespond(jsonHits, 201);
+
+        assertTrue(offlineService.reportCompletedSessions());
+        assertTrue(didSendNetworkRequest());
+        assertFalse(mediaDBService.sessionPresent(sessionId));
     }
 }
 
