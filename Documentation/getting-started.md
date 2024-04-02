@@ -10,20 +10,32 @@ Media extension depends on the following extensions:
 
 1. Installation via [Maven](https://maven.apache.org/) & [Gradle](https://gradle.org/) is the easiest and recommended way to get the AEP SDK into your Android app. Add the Mobile Core, Identity, Analytics, and Media extensions to your project using the app's Gradle file:
 
+    #### Kotlin
 
-   ```
-   implementation 'com.adobe.marketing.mobile:core:2.+'
-   implementation 'com.adobe.marketing.mobile:identity:2.+'
-   implementation 'com.adobe.marketing.mobile:analytics:2.+'
-   implementation 'com.adobe.marketing.mobile:media:3.+'
-   ```
+    ```kotlin
+    implementation(platform("com.adobe.marketing.mobile:sdk-bom:3.+"))
+    implementation("com.adobe.marketing.mobile:core")
+    implementation("com.adobe.marketing.mobile:identity")
+    implementation("com.adobe.marketing.mobile:analytics")
+    implementation("com.adobe.marketing.mobile:media")
+    ```
+
+    #### Groovy
+    
+    ```groovy
+    implementation platform('com.adobe.marketing.mobile:sdk-bom:3.+')
+    implementation 'com.adobe.marketing.mobile:core'
+    implementation 'com.adobe.marketing.mobile:identity'
+    implementation 'com.adobe.marketing.mobile:analytics'
+    implementation 'com.adobe.marketing.mobile:media'
+    ```
 
 > **Warning**  
 > Using dynamic dependency versions is not recommended for production apps. Refer to this [page](https://github.com/adobe/aepsdk-core-android/blob/main/Documentation/MobileCore/gradle-dependencies.md) for managing Gradle dependencies.
 
 2. Import the libraries:
 
-   ### Java
+   #### Java
 
    ```java
    import com.adobe.marketing.mobile.MobileCore;
@@ -32,7 +44,7 @@ Media extension depends on the following extensions:
    import com.adobe.marketing.mobile.Media;
    ```
 
-   ### Kotlin
+   #### Kotlin
 
    ```kotlin
    import com.adobe.marketing.mobile.MobileCore
@@ -43,7 +55,7 @@ Media extension depends on the following extensions:
 
 3. Import the Media library into your project and register it with `MobileCore`
 
-   ### Java
+   #### Java
 
    ```java
    public class MainApp extends Application {
@@ -65,7 +77,7 @@ Media extension depends on the following extensions:
     }
    ```
 
-   ### Kotlin
+   #### Kotlin
 
    ```kotlin
    class MyApp : Application() {

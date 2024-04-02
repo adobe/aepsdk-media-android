@@ -11,6 +11,7 @@
 
 package com.adobe.marketing.mobile.media.internal;
 
+import androidx.annotation.VisibleForTesting;
 import com.adobe.marketing.mobile.services.HttpMethod;
 import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.services.NetworkRequest;
@@ -23,7 +24,7 @@ class MediaSession {
     private static final int HTTP_TIMEOUT_SEC = 5;
     private static final int HTTP_OK = 200;
     private static final int HTTP_MULTIPLE_CHOICES = 300;
-    private static final int RETRY_COUNT = 2;
+    @VisibleForTesting static final int RETRY_COUNT = 2;
     private static final long MAX_ALLOWED_DURATION_BETWEEN_HITS_MS = 60000;
 
     private final Object mutex;
@@ -210,15 +211,16 @@ class MediaSession {
                         request,
                         connection -> {
                             String mcSessionId = null;
-
+                            boolean deviceOffline = false;
                             do {
                                 if (connection == null) {
                                     Log.debug(
                                             MediaInternalConstants.EXTENSION_LOG_TAG,
                                             LOG_TAG,
-                                            "trySendHit - (%s) Http request error, connection was"
-                                                    + " null",
+                                            "trySendHit - Failed to send the (%s) hit because the"
+                                                    + " connection is null (network is offline).",
                                             hitEventType);
+                                    deviceOffline = true;
                                     break;
                                 }
 
@@ -228,7 +230,7 @@ class MediaSession {
                                     Log.debug(
                                             MediaInternalConstants.EXTENSION_LOG_TAG,
                                             LOG_TAG,
-                                            "trySendHit - (%s) Http failed with response code %d ",
+                                            "trySendHit - (%s) Http failed with response code %d.",
                                             hitEventType,
                                             respCode);
                                     break;
@@ -242,11 +244,11 @@ class MediaSession {
                                         connection.getResponsePropertyValue("Location");
 
                                 if (sessionResponseFragment == null) {
-                                    Log.trace(
+                                    Log.debug(
                                             MediaInternalConstants.EXTENSION_LOG_TAG,
                                             LOG_TAG,
                                             "trySendHit - (%s) Media collection endpoint returned"
-                                                    + " null location header",
+                                                    + " null location header.",
                                             hitEventType);
                                     break;
                                 }
@@ -257,7 +259,7 @@ class MediaSession {
                                         MediaInternalConstants.EXTENSION_LOG_TAG,
                                         LOG_TAG,
                                         "trySendHit - (%s) Media collection endpoint created"
-                                                + " internal session : %s",
+                                                + " internal session : %s.",
                                         hitEventType,
                                         mcSessionId);
 
@@ -272,15 +274,25 @@ class MediaSession {
                             Log.debug(
                                     MediaInternalConstants.EXTENSION_LOG_TAG,
                                     LOG_TAG,
-                                    "trySendHit - (%s) Finished http connection",
+                                    "trySendHit - (%s) Finished http connection.",
                                     hitEventType);
 
                             synchronized (mutex) {
                                 boolean shouldRetry = false;
 
-                                if (hitIsSessionStart
+                                if (deviceOffline) {
+                                    // `MediaReportHelper.isReadyToSendHit` verifies network
+                                    // connectivity before sending a
+                                    // hit. If the network goes
+                                    // offline after verification but before sending the hit, retry
+                                    // the attempt regardless
+                                    // of the hit type. `trySendHit` will automatically resume when
+                                    // the network connection is
+                                    // restored.
+                                    shouldRetry = true;
+                                } else if (hitIsSessionStart
                                         && mcSessionId != null
-                                        && mcSessionId.length() > 0) {
+                                        && !mcSessionId.isEmpty()) {
                                     sessionID = mcSessionId;
                                 } else if (hitIsSessionStart) {
                                     shouldRetry = sessionStartRetryCount < RETRY_COUNT;
@@ -291,6 +303,13 @@ class MediaSession {
 
                                 if (!shouldRetry) {
                                     removeHit();
+                                } else {
+                                    Log.debug(
+                                            MediaInternalConstants.EXTENSION_LOG_TAG,
+                                            LOG_TAG,
+                                            "trySendHit - Will attempt to retry sending %s hit"
+                                                    + " later.",
+                                            hitEventType);
                                 }
                             }
                         });

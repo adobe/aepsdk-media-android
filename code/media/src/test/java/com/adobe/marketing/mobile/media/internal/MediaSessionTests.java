@@ -33,12 +33,12 @@ public class MediaSessionTests {
     MockMediaSessionCreatedDispatcher mockDispatcherSessionCreated;
 
     MockNetworkService mockNetworkService;
-    DeviceInforming mockDeviceInfoServie;
+    DeviceInforming mockDeviceInfoService;
 
     public MediaSessionTests() {
         mockNetworkService = new MockNetworkService();
-        mockDeviceInfoServie = mock(DeviceInforming.class);
-        ServiceProviderExtension.setDeviceInfoService(mockDeviceInfoServie);
+        mockDeviceInfoService = mock(DeviceInforming.class);
+        ServiceProviderExtension.setDeviceInfoService(mockDeviceInfoService);
         ServiceProvider.getInstance().setNetworkService(mockNetworkService);
 
         setNetworkConnectionStatus(DeviceInforming.ConnectionStatus.CONNECTED);
@@ -50,7 +50,7 @@ public class MediaSessionTests {
     }
 
     void setNetworkConnectionStatus(DeviceInforming.ConnectionStatus status) {
-        Mockito.when(mockDeviceInfoServie.getNetworkConnectionStatus()).thenReturn(status);
+        Mockito.when(mockDeviceInfoService.getNetworkConnectionStatus()).thenReturn(status);
     }
 
     void expectNetworkDataAndRespond(final String jsonHits, final int responseCode) {
@@ -520,5 +520,47 @@ public class MediaSessionTests {
 
         assertTrue(didSendNetworkRequest());
         assertFalse(mockDispatcherSessionCreated.dispatchSessionCreatedWasCalled);
+    }
+
+    @Test
+    public void test_process_retry_connectionIsNull() throws Exception {
+        mediaState.notifyMobileStateChanges(
+                MediaTestConstants.Configuration.SHARED_STATE_NAME, mockData.configSharedState);
+        mediaState.notifyMobileStateChanges(
+                MediaTestConstants.Identity.SHARED_STATE_NAME, mockData.identitySharedState);
+        mediaState.notifyMobileStateChanges(
+                MediaTestConstants.Analytics.SHARED_STATE_NAME, mockData.analyticsSharedState);
+
+        mediaSession.queueHit(mockData.sessionStart);
+        assertEquals(1, mediaSession.getQueueSize());
+
+        // In case of network failure, sessionStart hits are retried 2 more times being dropped.
+        // When network service returns null connection (network offline), hits should not be
+        // dropped.
+        for (int i = 0; i <= MediaSession.RETRY_COUNT + 1; ++i) {
+            mockNetworkService.reset();
+            mockNetworkService.setResponse(null);
+
+            mediaSession.process();
+            assertTrue(didSendNetworkRequest());
+            assertEquals(1, mediaSession.getQueueSize());
+        }
+
+        expectNetworkDataAndRespond(mockData.sessionStartJsonWithState, 201, mockSessionIdResponse);
+        mediaSession.process();
+        assertTrue(didSendNetworkRequest());
+        assertEquals(0, mediaSession.getQueueSize());
+
+        // In case of network failure, media hits other than session start are dropped.
+        // When network service returns null connection (network offline), the hit should not
+        // be dropped.
+        mediaSession.queueHit(mockData.play);
+
+        mockNetworkService.reset();
+        mockNetworkService.setResponse(null);
+
+        mediaSession.process();
+        assertTrue(didSendNetworkRequest());
+        assertEquals(1, mediaSession.getQueueSize());
     }
 }
