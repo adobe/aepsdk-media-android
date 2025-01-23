@@ -78,7 +78,7 @@ class MediaOfflineService implements MediaHitProcessor {
                         };
 
                 flushTimer = new Timer(FLUSH_TIMER);
-                flushTimer.scheduleAtFixedRate(timerTask, 0, FLUSH_TIMER_INTERVAL_MS);
+                flushTimer.schedule(timerTask, 0, FLUSH_TIMER_INTERVAL_MS);
             } catch (Exception e) {
                 Log.error(
                         MediaInternalConstants.EXTENSION_LOG_TAG,
@@ -295,7 +295,7 @@ class MediaOfflineService implements MediaHitProcessor {
                 return false;
             }
 
-            if (url == null || url.length() == 0) {
+            if (url == null || url.isEmpty()) {
                 Log.warning(
                         MediaInternalConstants.EXTENSION_LOG_TAG,
                         LOG_TAG,
@@ -320,6 +320,14 @@ class MediaOfflineService implements MediaHitProcessor {
         //	requestHeaders.put(MediaCoreConstants.Networking.HEADER_KEY_AEP_VALIDATION_TOKEN,
         // assuranceIntegrationId);
         // }
+
+        Log.trace(
+                MediaInternalConstants.EXTENSION_LOG_TAG,
+                LOG_TAG,
+                "reportCompletedSessions - Sending offline media request with url %s and \n body %s.",
+                url,
+                body
+        );
 
         NetworkRequest request =
                 new NetworkRequest(
