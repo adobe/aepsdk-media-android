@@ -17,7 +17,6 @@ import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.services.NetworkRequest;
 import com.adobe.marketing.mobile.services.ServiceProvider;
 import com.adobe.marketing.mobile.util.StringUtils;
-
 import java.util.*;
 
 class MediaOfflineService implements MediaHitProcessor {
@@ -280,7 +279,6 @@ class MediaOfflineService implements MediaHitProcessor {
             url = MediaReportHelper.getTrackingURL(mediaState.getMediaCollectionServer());
             body = MediaReportHelper.generateDownloadReport(mediaState, hits);
 
-
             if (StringUtils.isNullOrEmpty(body)) {
                 Log.warning(
                         MediaInternalConstants.EXTENSION_LOG_TAG,
@@ -327,10 +325,10 @@ class MediaOfflineService implements MediaHitProcessor {
         Log.trace(
                 MediaInternalConstants.EXTENSION_LOG_TAG,
                 LOG_TAG,
-                "reportCompletedSessions - Sending offline media request with url %s and \n body %s.",
+                "reportCompletedSessions - Sending offline media request with url %s and \n"
+                        + " body %s.",
                 url,
-                body
-        );
+                body);
 
         NetworkRequest request =
                 new NetworkRequest(

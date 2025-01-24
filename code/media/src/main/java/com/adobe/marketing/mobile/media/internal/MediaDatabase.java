@@ -59,35 +59,36 @@ class MediaDatabase {
         Set<String> ret = new HashSet<>();
 
         synchronized (dbMutex) {
-                try ( SQLiteDatabase database = openDatabase();
-                        Cursor cursor = database.query(
-                        true,
+            try (SQLiteDatabase database = openDatabase();
+                    Cursor cursor =
+                            database.query(
+                                    true,
+                                    MEDIA_TABLE_NAME,
+                                    new String[] {TB_KEY_SESSION_ID},
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null,
+                                    null)) {
+
+                if (cursor != null && cursor.moveToFirst()) {
+                    int sessionIdIndex =
+                            cursor.getColumnIndexOrThrow(TB_KEY_SESSION_ID); // Cache column index
+
+                    do {
+                        String sessionId = cursor.getString(sessionIdIndex);
+                        ret.add(sessionId);
+                    } while (cursor.moveToNext());
+                }
+            } catch (final SQLiteException e) {
+                Log.warning(
+                        MediaInternalConstants.EXTENSION_LOG_TAG,
+                        LOG_TAG,
+                        "Error getting session ids from table (%s). Error: (%s)",
                         MEDIA_TABLE_NAME,
-                        new String[]{TB_KEY_SESSION_ID},
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null)) {
-
-                    if (cursor != null && cursor.moveToFirst()) {
-                        int sessionIdIndex = cursor.getColumnIndexOrThrow(TB_KEY_SESSION_ID); // Cache column index
-
-                        do {
-                            String sessionId = cursor.getString(sessionIdIndex);
-                            ret.add(sessionId);
-                        } while (cursor.moveToNext());
-                    }
-                }
-                catch (final SQLiteException e) {
-                    Log.warning(
-                            MediaInternalConstants.EXTENSION_LOG_TAG,
-                            LOG_TAG,
-                            "Error getting session ids from table (%s). Error: (%s)",
-                            MEDIA_TABLE_NAME,
-                            e.getLocalizedMessage());
-                }
+                        e.getLocalizedMessage());
+            }
         }
 
         return ret;
@@ -98,14 +99,15 @@ class MediaDatabase {
 
         synchronized (dbMutex) {
             try (SQLiteDatabase database = openDatabase();
-                 Cursor cursor = database.query(
-                         MEDIA_TABLE_NAME,
-                         new String[] {TB_KEY_DATA},
-                         TB_KEY_SESSION_ID + "= ?",
-                         new String[] {sessionID},
-                         null,
-                         null,
-                         "id ASC")) {
+                    Cursor cursor =
+                            database.query(
+                                    MEDIA_TABLE_NAME,
+                                    new String[] {TB_KEY_DATA},
+                                    TB_KEY_SESSION_ID + "= ?",
+                                    new String[] {sessionID},
+                                    null,
+                                    null,
+                                    "id ASC")) {
 
                 if (cursor.moveToFirst()) {
                     do {

@@ -160,12 +160,12 @@ class MediaRealTimeService implements MediaHitProcessor {
                     sessionId,
                     hit.getEventType());
 
-
             if (sessionObj == null) {
                 Log.trace(
                         MediaInternalConstants.EXTENSION_LOG_TAG,
                         LOG_TAG,
-                        "processHit - Unable to process session with ID:(%s), session object is null.",
+                        "processHit - Unable to process session with ID:(%s), session object is"
+                                + " null.",
                         sessionId);
                 return;
             }
