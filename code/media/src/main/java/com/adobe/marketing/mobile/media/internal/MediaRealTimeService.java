@@ -159,6 +159,17 @@ class MediaRealTimeService implements MediaHitProcessor {
                     "processHit - Session (%s) Queueing hit %s.",
                     sessionId,
                     hit.getEventType());
+
+            if (sessionObj == null) {
+                Log.trace(
+                        MediaInternalConstants.EXTENSION_LOG_TAG,
+                        LOG_TAG,
+                        "processHit - Unable to process session with ID:(%s), session object is"
+                                + " null.",
+                        sessionId);
+                return;
+            }
+
             sessionObj.queueHit(hit);
         }
     }
