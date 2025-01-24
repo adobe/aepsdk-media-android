@@ -16,6 +16,7 @@ import com.adobe.marketing.mobile.VisitorID;
 import com.adobe.marketing.mobile.services.DeviceInforming;
 import com.adobe.marketing.mobile.services.Log;
 import com.adobe.marketing.mobile.util.DataReader;
+import com.adobe.marketing.mobile.util.StringUtils;
 import com.adobe.marketing.mobile.util.URLBuilder;
 import java.util.HashMap;
 import java.util.List;
@@ -298,34 +299,34 @@ class MediaReportHelper {
 
         String mediaCollectionServer = mediaState.getMediaCollectionServer();
 
-        if (mediaCollectionServer == null || mediaCollectionServer.length() == 0) {
+        if (StringUtils.isNullOrEmpty(mediaCollectionServer)) {
             return new ReturnTuple(
                     false, MediaInternalConstants.Configuration.MEDIA_COLLECTION_SERVER);
         }
 
         String analyticsServer = mediaState.getAnalyticsTrackingServer();
 
-        if (analyticsServer == null || analyticsServer.length() == 0) {
+        if (StringUtils.isNullOrEmpty(analyticsServer)) {
             return new ReturnTuple(
                     false, MediaInternalConstants.Configuration.ANALYTICS_TRACKING_SERVER);
         }
 
         String analyticsRsid = mediaState.getAnalyticsRsid();
 
-        if (analyticsRsid == null || analyticsRsid.length() == 0) {
+        if (StringUtils.isNullOrEmpty(analyticsRsid)) {
             return new ReturnTuple(false, MediaInternalConstants.Configuration.ANALYTICS_RSID);
         }
 
         String mcOrgId = mediaState.getMcOrgId();
 
-        if (mcOrgId == null || mcOrgId.length() == 0) {
+        if (StringUtils.isNullOrEmpty(mcOrgId)) {
             return new ReturnTuple(
                     false, MediaInternalConstants.Configuration.EXPERIENCE_CLOUD_ORGID);
         }
 
         String mcid = mediaState.getMcid();
 
-        if (mcid == null || mcid.length() == 0) {
+        if (StringUtils.isNullOrEmpty(mcid)) {
             return new ReturnTuple(false, MediaInternalConstants.Identity.MARKETING_VISITOR_ID);
         }
 
