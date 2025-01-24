@@ -113,7 +113,7 @@ class MediaDBServiceImpl implements MediaDBService {
         }
 
         List<String> dbHits = database.getHits(sessionID);
-        if (dbHits == null || dbHits.size() == 0) {
+        if (dbHits == null || dbHits.isEmpty()) {
             return ret;
         }
 
