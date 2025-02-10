@@ -19,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class Media {
-    private static final String EXTENSION_VERSION = "3.1.1";
+    private static final String EXTENSION_VERSION = "3.1.2";
 
     private Media() {}
 
